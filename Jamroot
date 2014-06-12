@@ -1,0 +1,9 @@
+build-project unittests ;
+
+lib lib-algo : [ glob src/*.cpp ] :
+	<toolset>darwin:<cxxflags>"-std=c++1y -fcolor-diagnostics"
+	<link>static
+: :
+	<toolset>darwin:<cxxflags>"-std=c++1y -fcolor-diagnostics"
+	<link>static
+;
