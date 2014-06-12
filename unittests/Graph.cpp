@@ -72,38 +72,6 @@ TEST_SUITE("Graph") {
 
 	};
 
-	TEST("Paths") {
-		{
-			Graph<int> g;
-		
-			g.addBidirectionalEdge(0, 1, 1);
-			g.addBidirectionalEdge(1, 2, 2);
-			g.addBidirectionalEdge(2, 3, 3);
-			g.addBidirectionalEdge(3, 4, 4);
-			g.addBidirectionalEdge(4, 0, 5);
-	
-			auto path = g.findPath(0, 4);
-	
-			CHECK(path.size() > 0);
-	
-			CHECK( false
-				|| path == Graph<int>::Path({0, 1, 2, 3, 4})
-				|| path == Graph<int>::Path({0, 4})
-			);
-		}
-
-		{
-			Graph<int> g;
-
-			g.addBidirectionalEdge(0, 1, 1);
-			g.addBidirectionalEdge(1, 2, 2);
-
-			auto path = g.findPath(0, 2);
-
-			CHECK(path == Graph<int>::Path({0, 1, 2}));
-		}
-	};
-
 	TEST("Change Weights") {
 		Graph<int> g;
 		
@@ -122,6 +90,22 @@ TEST_SUITE("Graph") {
 		g.changeWeight(0, 1, 2);
 
 		CHECK(g.edgeWeight(0, 1) == 2);
+	};
+
+	TEST("Edge Sum") {
+		Graph<int> g;
+		
+		g.addBidirectionalEdge(0, 1, 1);
+		g.addBidirectionalEdge(1, 2, 2);
+		g.addBidirectionalEdge(2, 3, 3);
+		g.addBidirectionalEdge(3, 4, 4);
+		g.addBidirectionalEdge(4, 0, 5);
+
+		CHECK(g.edgeSum(4) == 9);
+
+		g.addBidirectionalEdge(2, 4, 1);
+
+		CHECK(g.edgeSum(4) == 10);
 	};
 
 };
