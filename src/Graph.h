@@ -1,6 +1,8 @@
 #include <boost/multi_array.hpp>
 
 #include <iostream>
+#include <vector>
+#include <cassert>
 
 template <typename WeightType>
 class Graph {
@@ -11,22 +13,29 @@ public:
 		// init only
 	}
 
-	void addEdge(size_t v1, size_t v2, size_t weight) {
-		size_t maxVert = std::max(v1, v2);
+	void addEdge(size_t v0, size_t v1, WeightType weight) {
+		assert(weight != 0);
+
+		size_t maxVert = std::max(v0, v1);
 		if (size() <= maxVert) {
-			resize(maxVert);
+			resize(maxVert + 1);
 		}
 
-		_adjacencyMatrix[v1][v2] = weight;
+		_adjacencyMatrix[v0][v1] = weight;
 	}
 
-	void addBidirectionalEdge(size_t v1, size_t v2, size_t weight) {
-		addEdge(v1, v2, weight);
-		addEdge(v2, v1, weight);
+	void addBidirectionalEdge(size_t v0, size_t v1, WeightType weight) {
+		addEdge(v0, v1, weight);
+		addEdge(v1, v0, weight);
 	}
 
-	size_t edgeWeight(size_t v1, size_t v2) const {
-		return _adjacencyMatrix[v1][v2];
+	size_t edgeWeight(size_t v0, size_t v1) const {
+		return _adjacencyMatrix[v0][v1];
+	}
+
+	void changeWeight(size_t v0, size_t v1, WeightType weight) {
+		assert(size() > std::max(v0, v1));
+		_adjacencyMatrix[v0][v1] = weight;
 	}
 
 	void resize(size_t newSize) {
@@ -52,6 +61,53 @@ public:
 		return out;
 	}
 
+	typedef std::vector<size_t> Path;
+
+	// empty path means none was found
+	Path findPath(size_t v0, size_t v1) {
+		Path p = {v0};
+		
+		if (!_findPath(p, v1)) {
+			p.pop_back();
+		}
+
+		return p;
+	}
+
 private:
 	boost::multi_array<WeightType, 2> _adjacencyMatrix;
+
+	// true on path complete, false if no path from p.back to v1 was found
+	bool _findPath(Path& current, size_t v1) {
+		assert(!current.empty());
+
+		size_t start = current.back();
+
+		if (start == v1) {
+			return true;
+		}
+
+		size_t verticies = size();
+		for (size_t i = 0; i < verticies; ++i) {
+			if (_adjacencyMatrix[start][i] == 0) {
+				// edge doesn't exist
+				// TODO: use a different list for edges? Allow 0 weight edges?
+				continue;
+			}
+
+			auto it = std::find(current.begin(), current.end(), i);
+			if (it != current.end()) {
+				// vertex is already in path
+				continue;
+			}
+
+			current.push_back(i);
+			if (_findPath(current, v1)) {
+				return true;
+			}
+			current.pop_back();
+		}
+
+		return false;
+	}
 };
